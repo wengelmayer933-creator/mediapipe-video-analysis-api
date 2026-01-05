@@ -1,0 +1,22 @@
+# Python
+__pycache__/
+*.pyc
+
+# Notebooks
+*.ipynb
+
+# Media & Outputs
+*.mp4
+*.mov
+*.avi
+
+temp/
+output/
+uploads/
+results/
+videos/
+webflow_input/
+webflow_output/
+
+.DS_Store
+
