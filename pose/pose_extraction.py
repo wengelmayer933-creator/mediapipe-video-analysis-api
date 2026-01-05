@@ -1,17 +1,27 @@
 import cv2
 import mediapipe as mp
 import csv
-import time
+
 
 def extract_pose_to_csv(video_path: str, output_csv: str):
+    # 🔒 Safety check: Render / MediaPipe Wheels
+    if not hasattr(mp, "solutions"):
+        raise RuntimeError(
+            "MediaPipe installation is broken: 'mp.solutions' not found. "
+            "Make sure Python 3.10 and mediapipe==0.10.9 are used."
+        )
+
     mp_pose = mp.solutions.pose
     pose = mp_pose.Pose(static_image_mode=False)
 
     cap = cv2.VideoCapture(video_path)
 
+    if not cap.isOpened():
+        raise RuntimeError(f"Could not open video file: {video_path}")
+
     fieldnames = (
-        ["timestamp"] +
-        [f"lm_{i}_{axis}" for i in range(33) for axis in ["x", "y", "z"]]
+        ["timestamp"]
+        + [f"lm_{i}_{axis}" for i in range(33) for axis in ["x", "y", "z"]]
     )
 
     with open(output_csv, "w", newline="") as f:
@@ -42,4 +52,4 @@ def extract_pose_to_csv(video_path: str, output_csv: str):
     cap.release()
     pose.close()
 
-    print("Pose CSV erzeugt:", output_csv)
+    print(f"Pose CSV erzeugt: {output_csv}")
