@@ -44,9 +44,9 @@ def generate_ghost_pose_reference(
             dfs.append(df)
 
     if not dfs:
-        raise RuntimeError("Keine gültigen CSVs mit 'phase'-Spalte gefunden")
+        raise RuntimeError("Keine gültigen CSVs mit 'phase' Spalte gefunden")
 
-    print(f"✅ {len(dfs)} gute Ollie-CSVs geladen")
+    print(f"{len(dfs)} gute Ollie-CSVs geladen")
 
     pose_cols = [
         c for c in dfs[0].columns
@@ -90,9 +90,7 @@ from pathlib import Path
 
 
 def load_ghost_pose(csv_path: str) -> pd.DataFrame:
-    """
-    Lädt eine Ghost-Pose-Referenz CSV als DataFrame
-    """
+    
     csv_path = Path(csv_path)
 
     if not csv_path.exists():
