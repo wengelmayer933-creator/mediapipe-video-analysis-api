@@ -11,7 +11,7 @@ RESULTS_DIR = BASE_DIR / "results"
 RESULTS_DIR.mkdir(exist_ok=True)
 
 # 👉 HIER DIE WORKER-URL EINTRAGEN
-WORKER_URL = "https://<DEIN-WORKER-SERVICE>.onrender.com/process"
+WORKER_URL = "https://skate-worker.onrender.com/process"
 
 
 @app.get("/")
