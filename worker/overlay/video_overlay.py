@@ -2,19 +2,19 @@ import cv2
 import pandas as pd
 
 # Ghost 
-from .draw_ghost import draw_ghost_pose, get_phase_ghost_row
+from draw_ghost import draw_ghost_pose, get_phase_ghost_row
 
 # Skeleton 
-from .draw_skeleton import draw_colored_skeleton
+from draw_skeleton import draw_colored_skeleton
 
 # HUD 
-from .draw_hud import draw_feedback_hud, draw_phase_timeline
+from draw_hud import draw_feedback_hud, draw_phase_timeline
 
 # Arrows 
-from .draw_arrows import draw_correction_arrow
+from draw_arrows import draw_correction_arrow
 
 # Joint Feedback Draws 
-from .joint_feedback import (
+from joint_feedback import (
     draw_knee_feedback,
     draw_hip_feedback,
     draw_elbow_feedback,
@@ -23,7 +23,7 @@ from .joint_feedback import (
 )
 
 # Feedback Logic 
-from worker.feedback.feedback_logic import (
+from feedback.feedback_logic import (
     is_person_visible,
     is_feedback_allowed,
 )

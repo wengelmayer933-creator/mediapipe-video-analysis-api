@@ -4,7 +4,7 @@ import cv2
 import pandas as pd
 import numpy as np
 
-from worker.feedback.feedback_logic import (
+from feedback.feedback_logic import (
     extract_knee_angle,
     detect_ollie_phases
 )
