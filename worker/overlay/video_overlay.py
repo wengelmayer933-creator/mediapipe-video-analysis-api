@@ -14,7 +14,7 @@ from overlay.draw_hud import draw_feedback_hud, draw_phase_timeline
 from overlay.draw_arrows import draw_correction_arrow
 
 # Joint Feedback Draws 
-from joint_feedback import (
+from overlay.joint_feedback import (
     draw_knee_feedback,
     draw_hip_feedback,
     draw_elbow_feedback,
