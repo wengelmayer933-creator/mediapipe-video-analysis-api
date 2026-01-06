@@ -1,6 +1,6 @@
 import cv2
 from feedback.feedback_logic import is_feedback_allowed
-from feedback_texts import JOINT_FEEDBACK_TEXT
+from overlay.feedback_texts import JOINT_FEEDBACK_TEXT
 
 def draw_feedback_hud(frame, joint_states, phase):
     h, w = frame.shape[:2]
