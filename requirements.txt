@@ -1,9 +1,0 @@
-fastapi
-uvicorn
-pandas
-numpy<2
-opencv-python
-mediapipe==0.10.9
-
-
-
