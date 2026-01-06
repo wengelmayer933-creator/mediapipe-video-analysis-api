@@ -1,25 +1,17 @@
 from fastapi import FastAPI, UploadFile, File
-from fastapi.responses import JSONResponse, FileResponse
-import uuid
-import shutil
-import json
+from fastapi.responses import FileResponse, JSONResponse
 from pathlib import Path
+import uuid
+import requests
 
-app = FastAPI(title="Mediapipe Video Analysis API")
+app = FastAPI(title="Video Analysis API")
 
-# Pfade 
 BASE_DIR = Path(__file__).resolve().parent
-UPLOADS_DIR = BASE_DIR / "uploads"
-SHARED_DIR = BASE_DIR / "shared"
-JOBS_DIR = SHARED_DIR / "jobs"
-RESULTS_DIR = SHARED_DIR / "results"
-VIDEOS_DIR = SHARED_DIR / "videos"
+RESULTS_DIR = BASE_DIR / "results"
+RESULTS_DIR.mkdir(exist_ok=True)
 
-# Ordner sicherstellen
-UPLOADS_DIR.mkdir(exist_ok=True)
-JOBS_DIR.mkdir(parents=True, exist_ok=True)
-RESULTS_DIR.mkdir(parents=True, exist_ok=True)
-VIDEOS_DIR.mkdir(parents=True, exist_ok=True)
+# 👉 HIER DIE WORKER-URL EINTRAGEN
+WORKER_URL = "https://<DEIN-WORKER-SERVICE>.onrender.com/process"
 
 
 @app.get("/")
@@ -27,54 +19,59 @@ def root():
     return {"status": "ok"}
 
 
-# 1. Video hochladen & Job anlegen
 @app.post("/analyze")
 def analyze_video(file: UploadFile = File(...)):
     job_id = uuid.uuid4().hex[:8]
 
-    input_path = UPLOADS_DIR / f"{job_id}.mp4"
-    with open(input_path, "wb") as buffer:
-        shutil.copyfileobj(file.file, buffer)
+    try:
+        response = requests.post(
+            WORKER_URL,
+            files={
+                "file": (
+                    file.filename,
+                    file.file,
+                    file.content_type,
+                )
+            },
+            timeout=900,  # 15 Minuten
+        )
 
-    job = {
-        "job_id": job_id,
-        "input_video": str(input_path)
-    }
+    except requests.RequestException as e:
+        return JSONResponse(
+            status_code=500,
+            content={"error": str(e)},
+        )
 
-    with open(JOBS_DIR / f"{job_id}.json", "w") as f:
-        json.dump(job, f)
+    if response.status_code != 200:
+        return JSONResponse(
+            status_code=500,
+            content={"error": "Worker failed"},
+        )
+
+    output_path = RESULTS_DIR / f"{job_id}.mp4"
+
+    with open(output_path, "wb") as f:
+        f.write(response.content)
 
     return {
         "job_id": job_id,
-        "status": "processing"
+        "status": "done",
+        "result_url": f"/result/{output_path.name}",
     }
 
 
-# 2. Status abfragen (UI polling)
-@app.get("/status/{job_id}")
-def get_status(job_id: str):
-    result_file = RESULTS_DIR / f"{job_id}.json"
-
-    if not result_file.exists():
-        return {"status": "processing"}
-
-    with open(result_file) as f:
-        return json.load(f)
-
-
-# 3. Ergebnisvideo ausliefern
 @app.get("/result/{filename}")
-def get_result_video(filename: str):
-    video_path = VIDEOS_DIR / filename
+def get_result(filename: str):
+    file_path = RESULTS_DIR / filename
 
-    if not video_path.exists():
+    if not file_path.exists():
         return JSONResponse(
             status_code=404,
-            content={"error": "file not found"}
+            content={"error": "file not found"},
         )
 
     return FileResponse(
-        video_path,
+        file_path,
         media_type="video/mp4",
-        filename=filename
+        filename=filename,
     )

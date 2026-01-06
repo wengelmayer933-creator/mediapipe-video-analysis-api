@@ -1,74 +1,64 @@
-import time
-from pathlib import Path
-import pandas as pd
-
 import os
-import threading
-from http.server import HTTPServer, BaseHTTPRequestHandler
+import tempfile
+from pathlib import Path
+
+import pandas as pd
+from fastapi import FastAPI, UploadFile, File
+from fastapi.responses import FileResponse, JSONResponse
+import uvicorn
 
 from pipeline import analyze_video_pipeline
 
 
-# =========================
-# Render Dummy HTTP Server
-# =========================
-class RenderHealthHandler(BaseHTTPRequestHandler):
-    def do_GET(self):
-        self.send_response(200)
-        self.end_headers()
-        self.wfile.write(b"Worker running")
+app = FastAPI(title="Video Worker")
 
-def start_render_port():
-    port = int(os.environ.get("PORT", 10000))
-    server = HTTPServer(("0.0.0.0", port), RenderHealthHandler)
-    server.serve_forever()
-
-threading.Thread(target=start_render_port, daemon=True).start()
-
-
-# =========================
-# Worker Logic
-# =========================
-BASE = Path(__file__).resolve().parents[1]
-UPLOADS = BASE / "uploads"
-TEMP = BASE / "temp"
-GHOST_CSV = BASE / "shared" / "ollie_ghost.csv"
-
-print("Worker gestartet")
-print("Uploads:", UPLOADS)
-print("Temp:", TEMP)
-
-UPLOADS.mkdir(exist_ok=True)
-TEMP.mkdir(exist_ok=True)
+# Ghost CSV laden
+BASE_DIR = Path(__file__).resolve().parent
+GHOST_CSV = BASE_DIR / "shared" / "ollie_ghost.csv"
 
 ghost_df = pd.read_csv(GHOST_CSV)
 
-processed = set()
 
-while True:
-    for video_path in UPLOADS.glob("*.mp4"):
-        job_id = video_path.stem.split("_")[0]
+@app.get("/")
+def health():
+    return {"status": "worker-ok"}
 
-        output_file = TEMP / f"{job_id}_analysis.mp4"
 
-        if output_file.exists():
-            continue
+@app.post("/process")
+async def process_video(file: UploadFile = File(...)):
+    try:
+        # Temp Input
+        with tempfile.NamedTemporaryFile(delete=False, suffix=".mp4") as tmp:
+            tmp.write(await file.read())
+            input_path = tmp.name
 
-        if job_id in processed:
-            continue
+        # Temp Output
+        output_dir = Path(tempfile.mkdtemp())
 
-        print(f"Verarbeite Job {job_id}")
+        analyze_video_pipeline(
+            input_video_path=input_path,
+            ghost_df=ghost_df,
+            work_dir=str(output_dir),
+        )
 
-        try:
-            analyze_video_pipeline(
-                input_video_path=str(video_path),
-                ghost_df=ghost_df,
-                work_dir=str(TEMP),
-            )
-            print(f"✔ Job {job_id} fertig")
-            processed.add(job_id)
+        result_video = next(output_dir.glob("*_analysis.mp4"))
 
-        except Exception as e:
-            print(f"Fehler bei Job {job_id}:", e)
+        return FileResponse(
+            path=result_video,
+            media_type="video/mp4",
+            filename=result_video.name,
+        )
 
-    time.sleep(2)
+    except Exception as e:
+        return JSONResponse(
+            status_code=500,
+            content={"error": str(e)},
+        )
+
+
+if __name__ == "__main__":
+    uvicorn.run(
+        app,
+        host="0.0.0.0",
+        port=int(os.environ.get("PORT", 10000)),
+    )
