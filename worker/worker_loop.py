@@ -1,6 +1,9 @@
 import time
 from pathlib import Path
 import pandas as pd
+import threading
+import os
+from http.server import HTTPServer, BaseHTTPRequestHandler
 
 from pipeline import analyze_video_pipeline
 
@@ -47,3 +50,15 @@ while True:
             print(f"Fehler bei Job {job_id}:", e)
 
     time.sleep(2)
+
+class HealthHandler(BaseHTTPRequestHandler):
+    def do_GET(self):
+        self.send_response(200)
+        self.end_headers()
+        self.wfile.write(b"Worker running")
+
+def start_health_server():
+    port = int(os.environ.get("PORT", 10000))
+    HTTPServer(("0.0.0.0", port), HealthHandler).serve_forever()
+
+threading.Thread(target=start_health_server, daemon=True).start()
