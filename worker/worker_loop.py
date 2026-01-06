@@ -2,7 +2,7 @@ import time
 from pathlib import Path
 import pandas as pd
 
-from worker.pipeline import analyze_video_pipeline
+from pipeline import analyze_video_pipeline
 
 BASE = Path(__file__).resolve().parents[1]
 UPLOADS = BASE / "uploads"
