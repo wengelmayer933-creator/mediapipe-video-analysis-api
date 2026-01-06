@@ -45,8 +45,13 @@ def analyze_video(file: UploadFile = File(...)):
     if response.status_code != 200:
         return JSONResponse(
             status_code=500,
-            content={"error": "Worker failed"},
-        )
+            content={
+                "error": "Worker failed",
+                "worker_status": response.status_code,
+                "worker_response": response.text,
+         },
+    )
+
 
     output_path = RESULTS_DIR / f"{job_id}.mp4"
 
