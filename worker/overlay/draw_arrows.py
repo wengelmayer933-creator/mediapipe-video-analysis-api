@@ -1,5 +1,5 @@
 import cv2
-from feedback.feedback_logic import is_feedback_allowed
+from worker.feedback.feedback_logic import is_feedback_allowed
 from .rules import JOINT_ARROW_RULES
 
 def draw_correction_arrow(frame, joint, row, w, h, state, phase):

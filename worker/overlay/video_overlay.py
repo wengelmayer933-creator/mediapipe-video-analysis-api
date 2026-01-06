@@ -1,19 +1,19 @@
 import cv2
 import pandas as pd
 
-# --- Ghost ---
+# Ghost 
 from .draw_ghost import draw_ghost_pose, get_phase_ghost_row
 
-# --- Skeleton ---
+# Skeleton 
 from .draw_skeleton import draw_colored_skeleton
 
-# --- HUD ---
+# HUD 
 from .draw_hud import draw_feedback_hud, draw_phase_timeline
 
-# --- Arrows ---
+# Arrows 
 from .draw_arrows import draw_correction_arrow
 
-# --- Joint Feedback Draws (DAS HAT GEFEHLT) ---
+# Joint Feedback Draws 
 from .joint_feedback import (
     draw_knee_feedback,
     draw_hip_feedback,
@@ -22,8 +22,8 @@ from .joint_feedback import (
     draw_foot_feedback,
 )
 
-# --- Feedback Logic ---
-from feedback.feedback_logic import (
+# Feedback Logic 
+from worker.feedback.feedback_logic import (
     is_person_visible,
     is_feedback_allowed,
 )
@@ -34,9 +34,8 @@ def live_overlay_video(
     feedback_csv: str,
     ghost_df: pd.DataFrame,
     output_path: str,
-    show_ghost_in_phases=None
+    show_ghost_in_phases=None,
 ):
-
     if show_ghost_in_phases is None:
         show_ghost_in_phases = {"prep", "pop", "air", "land"}
 
@@ -54,7 +53,7 @@ def live_overlay_video(
         output_path,
         cv2.VideoWriter_fourcc(*"mp4v"),
         fps,
-        (w, h)
+        (w, h),
     )
 
     frame_idx = 0
@@ -67,7 +66,7 @@ def live_overlay_video(
         time_sec = frame_idx / fps
         pulse_phase = frame_idx / 6.0  # Ghost-Animation
 
-        # nächste CSV-Zeile
+        # nächste CSV-Zeile 
         row = df.iloc[(df["time_sec"] - time_sec).abs().argsort()[:1]].iloc[0]
 
         if not is_person_visible(row):
@@ -77,7 +76,7 @@ def live_overlay_video(
 
         phase = str(row.get("phase", "")).lower()
 
-        # --- GHOST POSE ---
+        # GHOST POSE 
         if phase in show_ghost_in_phases:
             ghost_ref_row = get_phase_ghost_row(ghost_df, phase)
             if ghost_ref_row is not None:
@@ -87,10 +86,10 @@ def live_overlay_video(
                     w,
                     h,
                     alpha=0.45,
-                    pulse_phase=pulse_phase
+                    pulse_phase=pulse_phase,
                 )
 
-        # --- FEEDBACK ---
+        # FEEDBACK 
         joint_states = {}
         joint_states.update(draw_knee_feedback(frame, row, w, h, phase))
         joint_states.update(draw_hip_feedback(frame, row, w, h, phase))
@@ -114,3 +113,4 @@ def live_overlay_video(
     out.release()
 
     return output_path
+

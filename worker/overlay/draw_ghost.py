@@ -1,7 +1,6 @@
-import numpy as np
 import cv2
 import numpy as np
-
+import pandas as pd   
 
 
 def get_phase_ghost_row(ghost_df, phase):
@@ -13,21 +12,21 @@ def get_phase_ghost_row(ghost_df, phase):
 
     return rows.iloc[0]
 
+
 def interpolate_ghost_pose(row_a, row_b, t):
-    
     interp = {}
 
     for c in row_a.index:
         if c.endswith("_x") or c.endswith("_y"):
             interp[c] = (1 - t) * row_a[c] + t * row_b[c]
 
-    return pd.Series(interp)
+    return pd.Series(interp)   
+
 
 def draw_ghost_pose(frame, ref_row, w, h, alpha=0.45, pulse_phase=0.0):
-  
     ghost = frame.copy()
 
-    ghost_color = (0, 220, 255)  # Cyan
+    ghost_color = (0, 220, 255)  
     thickness = 4
 
     y_offset = int(3 * np.sin(pulse_phase))
@@ -59,6 +58,4 @@ def draw_ghost_pose(frame, ref_row, w, h, alpha=0.45, pulse_phase=0.0):
         cv2.line(ghost, (x1, y1), (x2, y2), ghost_color, thickness)
 
     pulse_alpha = alpha + 0.1 * np.sin(pulse_phase)
-
     cv2.addWeighted(ghost, pulse_alpha, frame, 1 - pulse_alpha, 0, frame)
-

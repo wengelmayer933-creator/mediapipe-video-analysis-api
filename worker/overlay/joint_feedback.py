@@ -1,6 +1,6 @@
 import cv2
-from feedback.angles import angle_3points
-from overlay.rules import KNEE_ANGLE_RULES
+from worker.feedback.angles import angle_3points
+from worker.overlay.rules import KNEE_ANGLE_RULES
 
 
 def knee_state_phase(row, side, phase):

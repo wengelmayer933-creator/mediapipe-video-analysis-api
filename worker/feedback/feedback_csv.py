@@ -4,9 +4,10 @@ import cv2
 import pandas as pd
 import numpy as np
 
-from .feedback_logic import extract_knee_angle, detect_ollie_phases
-
-
+from worker.feedback.feedback_logic import (
+    extract_knee_angle,
+    detect_ollie_phases
+)
 
 def load_frames_from_csv(csv_path):
     import pandas as pd

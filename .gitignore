@@ -1,22 +1,17 @@
 # Python
+.venv/
 __pycache__/
 *.pyc
 
-# Notebooks
-*.ipynb
-
-# Media & Outputs
-*.mp4
-*.mov
-*.avi
-
-temp/
-output/
-uploads/
-results/
-videos/
-webflow_input/
-webflow_output/
-
+# OS
 .DS_Store
 
+# Runtime data 
+temp/
+uploads/
+shared/jobs/
+shared/results/
+shared/videos/
+
+# Env
+.env

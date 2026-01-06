@@ -3,9 +3,10 @@ import uuid
 import shutil
 import pandas as pd
 
-from pose.pose_extraction import extract_pose_to_csv
-from feedback.feedback_csv import generate_feedback_csv_from_pose
-from overlay.video_overlay import live_overlay_video
+# absolute Imports aus worker
+from worker.pose.pose_extraction import extract_pose_to_csv
+from worker.feedback.feedback_csv import generate_feedback_csv_from_pose
+from worker.overlay.video_overlay import live_overlay_video
 
 
 def analyze_video_pipeline(
@@ -13,13 +14,12 @@ def analyze_video_pipeline(
     ghost_df: pd.DataFrame,
     work_dir: str = "temp"
 ) -> str:
-    
 
-    # ---------- CHECK INPUT ----------
+    #  inputcheck 
     if not os.path.exists(input_video_path):
         raise FileNotFoundError(f"Input-Video existiert nicht:\n{input_video_path}")
 
-    # ---------- SETUP ----------
+    # setup 
     os.makedirs(work_dir, exist_ok=True)
 
     job_id = uuid.uuid4().hex[:8]
@@ -34,19 +34,19 @@ def analyze_video_pipeline(
     print("▶ Job:", job_id)
     print("▶ Input:", video_path)
 
-    # ---------- 1. POSE ----------
+    # 1. Pose 
     extract_pose_to_csv(
         video_path=video_path,
         output_csv=pose_csv
     )
 
-    # ---------- 2. FEEDBACK ----------
+    # 2. feedback
     generate_feedback_csv_from_pose(
         pose_csv_path=pose_csv,
         out_path=feedback_csv
     )
 
-    # ---------- 3. OVERLAY ----------
+    # 3. overlay
     live_overlay_video(
         video_path=video_path,
         feedback_csv=feedback_csv,
@@ -56,3 +56,4 @@ def analyze_video_pipeline(
 
     print("Analyse fertig:", output_video)
     return output_video
+
