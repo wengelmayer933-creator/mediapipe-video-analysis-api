@@ -1,7 +1,7 @@
 import pandas as pd
 from pathlib import Path
 
-from worker.pipeline import analyze_video_pipeline
+from pipeline import analyze_video_pipeline
 
 if __name__ == "__main__":
     BASE = Path(__file__).resolve().parent.parent

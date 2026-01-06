@@ -4,9 +4,9 @@ import shutil
 import pandas as pd
 
 # absolute Imports aus worker
-from worker.pose.pose_extraction import extract_pose_to_csv
-from worker.feedback.feedback_csv import generate_feedback_csv_from_pose
-from worker.overlay.video_overlay import live_overlay_video
+from pose.pose_extraction import extract_pose_to_csv
+from feedback.feedback_csv import generate_feedback_csv_from_pose
+from overlay.video_overlay import live_overlay_video
 
 
 def analyze_video_pipeline(
